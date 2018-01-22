@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<api context="/healthcarepost" name="HealthCarePostAPI" xmlns="http://ws.apache.org/ns/synapse">
+    <resource methods="POST" uri-template="/doctors">
+        <inSequence>
+            <send>
+                <endpoint key="PostDoctorEP"/>
+            </send>
+        </inSequence>
+        <outSequence>
+            <send/>
+        </outSequence>
+        <faultSequence/>
+    </resource>
+</api>
