@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<con:soapui-project id="388eb9b5-bb17-4b78-b6d9-f98358bfaeec" activeEnvironment="Default" name="HealthService" soapui-version="5.4.0" xmlns:con="http://eviware.com/soapui/config"><con:settings/><con:interface xsi:type="con:RestService" id="8fd8b6a7-f9f8-4aec-af57-4ef35cae5c3b" wadlVersion="http://wadl.dev.java.net/2009/02" name="http://localhost:8080" type="rest" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:settings/><con:definitionCache type="TEXT" rootPart=""/><con:endpoints><con:endpoint>http://localhost:8081</con:endpoint></con:endpoints><con:resource name="HealthService" path="/healthservice/doctors/ALL" id="d560f9ae-15ba-47f5-b244-bf5062f5dc71"><con:settings/><con:parameters/><con:method name="Healthservice 1" id="77acae22-b4c3-4298-ba4c-8c5c16284bd6" method="GET"><con:settings/><con:parameters/><con:representation type="REQUEST"><con:mediaType>application/json</con:mediaType><con:params/></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType xsi:nil="true"/><con:status>0</con:status><con:params/><con:element>data</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType>application/xml</con:mediaType><con:status>200</con:status><con:params/><con:element>doctors</con:element></con:representation><con:representation type="REQUEST"><con:mediaType>application/xml</con:mediaType><con:params/><con:element>doctors</con:element></con:representation><con:representation type="RESPONSE"><con:mediaType>text/html; charset=iso-8859-1</con:mediaType><con:status>200</con:status><con:params/><con:element>html</con:element></con:representation><con:request name="PostRequest" id="115e0eb2-17e7-438f-9cd8-2fd62c49d28b" mediaType="application/xml" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:endpoint>http://localhost:8080</con:endpoint><con:request><![CDATA[<doctors>
+	<doctor>
+		<id>20</id>
+		<name>Naveen Wongyyy</name>
+		<hospital>grand oak community hospital</hospital>
+		<category>surgery</category>
+		<availability>6.00 a.m - 11.00 a.m</availability>
+		<fee>3000.0</fee>
+	</doctor>
+</doctors>]]></con:request><con:originalUri>http://localhost/healthservice</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/></con:request><con:request name="GetRequest" id="7f3e8cac-a287-45c1-a664-0165c8606ed3" mediaType="application/json" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:endpoint>http://localhost:8080</con:endpoint><con:request/><con:originalUri>http://localhost/healthservice</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/></con:request></con:method></con:resource></con:interface><con:restMockService id="8ee4c5a7-921f-4eae-82a5-e6cf63834fc6" port="8080" path="/" host="MC0ZKXGC" name="HealthMockService"><con:settings/><con:properties/><con:restMockAction name="healthservice" method="GET" resourcePath="/healthservice" id="047e13de-a631-46c5-a328-7c33abb219a6"><con:settings/><con:defaultResponse>GetResponse</con:defaultResponse><con:dispatchStyle>SCRIPT</con:dispatchStyle><con:dispatchPath>import javax.xml.transform.TransformerFactory
+import javax.xml.transform.stream.StreamResult
+import javax.xml.transform.stream.StreamSource
+
+def requestPath = mockRequest.getPath()
+log.info "Path: "+ requestPath
+def URIId = requestPath.tokenize('/')[-1]
+
+
+if(!URIId.isNumber()) { 
+   URIId="ALL";
+}
+
+log.info "URIId: "+ URIId
+def requestBody = mockRequest.getRequestContent()
+log.info "Request body: " + requestBody
+
+def xslt= new File("C:/WSO2/workspace/SOAPUIARTEFACTS/doctorGet.xslt").getText()
+
+// Create transformer
+def transformer = TransformerFactory.newInstance().newTransformer(new StreamSource(new StringReader(xslt)))
+
+// Load xml
+def xml= new File("C:/WSO2/workspace/SOAPUIARTEFACTS/doctors.xml").getText()
+
+// Set output file
+//def output = new FileOutputStream("C:/WSO2/workspace/SOAPUIARTEFACTS/output.xml")
+StringWriter outWriter = new StringWriter();
+StreamResult result = new StreamResult(outWriter);
+transformer.setParameter("inputId", URIId);
+// Perform transformation
+transformer.transform(new StreamSource(new StringReader(xml)),result)
+StringBuffer sb = outWriter.getBuffer()
+
+log.info "Response: " + outWriter.getBuffer()
+context.responseMessage= sb.toString()
+
+
+
+</con:dispatchPath><con:response name="GetResponse" id="8d740854-da2c-4ad9-9679-bbcc276c0489" httpResponseStatus="200"><con:settings/><con:responseContent>${responseMessage}</con:responseContent></con:response></con:restMockAction><con:restMockAction name="healthservice" method="POST" resourcePath="/healthservice" id="476447ac-9bc7-4bfe-96f3-0de84ed748b1"><con:settings/><con:defaultResponse>PostResponse</con:defaultResponse><con:dispatchStyle>SCRIPT</con:dispatchStyle><con:dispatchPath><![CDATA[import javax.xml.transform.TransformerFactory
+import javax.xml.transform.stream.StreamResult
+import javax.xml.transform.stream.StreamSource
+import javax.xml.XMLConstants
+import javax.xml.validation.SchemaFactory
+
+
+def validRequest = "true";
+def requestPath = mockRequest.getPath()
+log.info "Path: "+ requestPath
+
+
+def requestBody = mockRequest.getRequestContent()
+log.info "Request body: " + requestBody
+
+
+def factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
+File schemaLocation = new File("C:/WSO2/workspace/SOAPUIARTEFACTS/doctors.xsd");
+def schema = factory.newSchema(new StreamSource(new FileReader(schemaLocation)))
+//def data= new File("C:/WSO2/workspace/SOAPUIARTEFACTS/doctors2.xml")
+//log.info "data :" + data
+
+def validator = schema.newValidator()
+try{
+validator.validate(new StreamSource(new StringReader(requestBody)))
+}catch(Exception e){
+	log.info "I am in Exception"
+	validRequest = "false";
+ context.responseMessage= "<status>BUSINESS ERROR : Schema Validation Failed</status>"
+
+}
+
+
+
+if(validRequest.equals("true")){
+def doctors = new XmlSlurper().parseText(requestBody)
+
+def doctorId =  "${doctors.doctor.id}" 
+
+log.info "doctorId " + doctorId
+
+if(!doctorId.isNumber()) { 
+   context.responseMessage= "<status>BUSINESS ERROR : ID should be a number</status>"
+
+}		
+		
+else{
+def xslt= new File("C:/WSO2/workspace/SOAPUIARTEFACTS/doctorPost.xslt").getText()
+
+// Create transformer
+def transformer = TransformerFactory.newInstance().newTransformer(new StreamSource(new StringReader(xslt)))
+
+// Load xml
+def xml= new File("C:/WSO2/workspace/SOAPUIARTEFACTS/doctors.xml").getText()
+
+// Set output file
+
+StringWriter outWriter = new StringWriter();
+StreamResult result = new StreamResult(outWriter);
+//transformer.setParameter("input", "<doctors><doctor><id>19</id><name>Ash YYY</name></doctor></doctors>");
+// Perform transformation
+transformer.transform(new StreamSource(new StringReader(xml)),result)
+StringBuffer sb = outWriter.getBuffer()
+def xslOutput = sb.toString()
+log.info "xslOutput: " + xslOutput
+
+//String frag = "<doctor><id>19</id><name>Ash YYY</name><hospital>grand oak community hospital</hospital><category>surgery</category><availability>9.00 a.m - 11.00 a.m</availability><fee>7000.0</fee></doctor>"
+
+def frag = requestBody.substring(requestBody.indexOf("<doctor>"), requestBody.indexOf("</doctors>"))
+log.info "frag: " + frag
+def xmlOutput = new XmlSlurper().parseText( xslOutput )
+log.info "xmlOutput: " + xmlOutput
+def fragXML = new XmlSlurper().parseText( frag )
+log.info "fragXML: " + fragXML
+
+xmlOutput.appendNode(fragXML)
+
+log.info "xmlOutput2: " + xmlOutput
+String newDoc = new groovy.xml.StreamingMarkupBuilder().bind { mkp.yield xmlOutput }
+log.info "newDoc: " + newDoc
+def xmlFile= new File("C:/WSO2/workspace/SOAPUIARTEFACTS/doctors.xml")
+xmlFile.write newDoc
+context.responseMessage= "<status>Doctor added successfully</status>"
+}
+}
+]]></con:dispatchPath><con:response name="PostResponse" id="a9a9d21c-6498-4ab7-9c69-b97cfecbc288" httpResponseStatus="200"><con:settings/><con:responseContent>${responseMessage}</con:responseContent></con:response></con:restMockAction></con:restMockService><con:properties/><con:wssContainer/><con:oAuth2ProfileContainer/><con:oAuth1ProfileContainer/><con:sensitiveInformation/></con:soapui-project>
